@@ -41,7 +41,7 @@ def main():
     args.clip_layers = [2]
 
     dist_util.setup_dist()
-    logger.configure()
+    logger.configure(dir='output/test')
 
     if not os.path.exists(args.results_path):
         os.makedirs(args.results_path, exist_ok=True)
@@ -122,8 +122,22 @@ def create_argparser():
         classifier_scale=10000.0,
         results_path="",
     )
+    config = dict(
+        diffusion_steps=1000, 
+        noise_schedule='linear',
+        channel_mult="1,2,4",
+        use_checkpoint=True,
+        use_scale_shift_norm=True,
+        use_fp16=True,
+        num_channels=64,
+        num_head_channels=16,
+        num_res_blocks=1,
+        resblock_updown=False,
+        attention_resolutions="2",
+    )
     defaults.update(model_and_diffusion_defaults())
     defaults.update(classifier_defaults())
+    defaults.update(config)
     parser = argparse.ArgumentParser()
     add_dict_to_argparser(parser, defaults)
     return parser

@@ -5,6 +5,8 @@ Train a diffusion model on images.
 import argparse
 import os
 import math
+import torch
+import time
 from PIL import Image
 import torchvision as tv
 from guided_diffusion import dist_util, logger
@@ -29,7 +31,7 @@ def main():
     real = tv.transforms.ToTensor()(Image.open(args.data_dir))[None]
     adjust_scales2image(real, args)
 
-    logger.configure()
+    logger.configure(dir='output/train')
 
     logger.log("creating model and diffusion...")
     model, diffusion = create_model_and_diffusion(
@@ -37,6 +39,8 @@ def main():
     )
     model.to(dist_util.dev())
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
+    
+    # model = torch.compile(model)
 
     logger.log("creating data loader...")
     data = load_data(
@@ -53,7 +57,7 @@ def main():
     )
 
     logger.log("training...")
-    TrainLoop(
+    trainer = TrainLoop(
         model=model,
         diffusion=diffusion,
         data=data,
@@ -69,7 +73,27 @@ def main():
         schedule_sampler=schedule_sampler,
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
-    ).run_loop()
+        )
+    trainer.run_loop()
+    # warmup
+    # t1 = time.time()
+    # for i in range(10):
+    #     batch, cond = next(trainer.data)
+    #     trainer.run_step(batch, cond)
+    # t2 = time.time()
+    # print(t2-t1)
+    # profile
+    # with torch.profiler.profile(
+    #         activities=[torch.profiler.ProfilerActivity.CPU,
+    #                     torch.profiler.ProfilerActivity.CUDA, ],
+    #         record_shapes=True, profile_memory=True, with_stack=True,
+    #         on_trace_ready=torch.profiler.tensorboard_trace_handler('output/train'),
+    #         with_modules=True) as prof:
+    #     for i in range(3):
+    #         # print(i)
+    #         batch, cond = next(trainer.data)
+    #         trainer.run_step(batch, cond)
+    #         prof.step()
 
 
 def create_argparser():
@@ -94,7 +118,21 @@ def create_argparser():
         use_fp16=False,
         fp16_scale_growth=1e-3,
     )
+    config = dict(
+        diffusion_steps=1000, 
+        noise_schedule='linear',
+        channel_mult="1,2,4",
+        use_checkpoint=True,
+        use_scale_shift_norm=True,
+        use_fp16=True,
+        num_channels=64,
+        num_head_channels=16,
+        num_res_blocks=1,
+        resblock_updown=False,
+        attention_resolutions="2",
+    )
     defaults.update(model_and_diffusion_defaults())
+    defaults.update(config)
     parser = argparse.ArgumentParser()
     add_dict_to_argparser(parser, defaults)
     return parser
