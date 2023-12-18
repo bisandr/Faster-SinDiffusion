@@ -1,0 +1,14 @@
+export LOGDIR="output/train"
+
+CUDA_VISIBLE_DEVICES="0,1,2,3" mpiexec -n 4 \
+python image_train.py --data_dir data/test.jpg \
+ --batch_size 8 --lr 5e-4 --image_size 1024 
+ 
+
+python image_sample.py \
+ --data_dir data/test.jpg --image_size 1024 \
+ --model_root output/test --results_path result/test
+
+CUDA_VISIBLE_DEVICES="0,1,2,3" \
+python image_train.py --data_dir data/test.jpg \
+ --batch_size 8 --lr 5e-4 --image_size 1024 
