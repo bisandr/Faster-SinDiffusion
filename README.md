@@ -98,3 +98,4 @@ Our code is developed based on [guided-diffusion](https://github.com/openai/guid
 ## Contact
 Please feel free to open an issue or contact us personally if you have questions, need help, or need explanations.
 Write to one of the following email addresses: **wwlustc** at **mail** dot **ustc** dot **cn**.
+
