@@ -74,26 +74,26 @@ def main():
         weight_decay=args.weight_decay,
         lr_anneal_steps=args.lr_anneal_steps,
         )
-    trainer.run_loop()
+    # trainer.run_loop()
     # warmup
-    # t1 = time.time()
-    # for i in range(10):
-    #     batch, cond = next(trainer.data)
-    #     trainer.run_step(batch, cond)
-    # t2 = time.time()
-    # print(t2-t1)
+    t1 = time.time()
+    for i in range(10):
+        batch, cond = next(trainer.data)
+        trainer.run_step(batch, cond)
+    t2 = time.time()
+    print(t2-t1)
     # profile
-    # with torch.profiler.profile(
-    #         activities=[torch.profiler.ProfilerActivity.CPU,
-    #                     torch.profiler.ProfilerActivity.CUDA, ],
-    #         record_shapes=True, profile_memory=True, with_stack=True,
-    #         on_trace_ready=torch.profiler.tensorboard_trace_handler('output/train'),
-    #         with_modules=True) as prof:
-    #     for i in range(3):
-    #         # print(i)
-    #         batch, cond = next(trainer.data)
-    #         trainer.run_step(batch, cond)
-    #         prof.step()
+    with torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CPU,
+                        torch.profiler.ProfilerActivity.CUDA, ],
+            record_shapes=True, profile_memory=True, with_stack=True,
+            on_trace_ready=torch.profiler.tensorboard_trace_handler('output/train'),
+            with_modules=True) as prof:
+        for i in range(3):
+            # print(i)
+            batch, cond = next(trainer.data)
+            trainer.run_step(batch, cond)
+            prof.step()
 
 
 def create_argparser():
