@@ -1,6 +1,8 @@
 # Faster SinDiffusion
 Course project of Generative Model (PKU 2023 Autumn)
 
+https://github.com/LuChengTHU/dpm-solver/tree/main/examples/ddpm_and_guided-diffusion
+
 # SinDiffusion: Learning a Diffusion Model from a Single Natural Image
 
 Official PyTorch implementation of "SinDiffusion: Learning a Diffusion Model from a Single Natural Image".
