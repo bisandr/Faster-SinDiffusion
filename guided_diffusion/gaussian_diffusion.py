@@ -132,6 +132,10 @@ class GaussianDiffusion:
         # Use float64 for accuracy.
         betas = np.array(betas, dtype=np.float64)
         self.betas = betas
+        print("betas:", betas)
+        print("betas > 0:", betas > 0)
+        print("betas <= 1:", betas <= 1)
+
         assert len(betas.shape) == 1, "betas must be 1-D"
         assert (betas > 0).all() and (betas <= 1).all()
 
